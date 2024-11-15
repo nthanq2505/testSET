@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 export const Wrapper = styled.label({
   display: "flex",
   alignItems: "center",
+  justifyContent: "space-between",
   width: "100%",
   borderRadius: 4,
   marginBottom: 8,
@@ -31,11 +32,26 @@ const Checkbox = styled.input({
   marginRight: 12,
 });
 
+const DeleteButton = styled.button({
+  background: "transparent",
+  color: "transparent",
+  border: "none",
+  borderRadius: 4,
+  padding: "8px 12px",
+  cursor: "pointer",
+  transition: "color 0.3s",
+  '&:hover': {
+    color: "white",
+    background: "red",
+  },
+});
+
 export interface TodoItemProps {
   id: string;
   label: string;
   checked?: boolean;
-  onChange?: (checked: boolean) => void;
+  onChange?: (checked: boolean, id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const TodoItem: FC<TodoItemProps> = ({
@@ -43,6 +59,7 @@ export const TodoItem: FC<TodoItemProps> = ({
   label,
   checked = false,
   onChange,
+  onDelete,
 }) => {
   return (
     <Wrapper>
@@ -50,9 +67,10 @@ export const TodoItem: FC<TodoItemProps> = ({
         type="checkbox"
         id={id}
         checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={(e) => onChange(e.target.checked, id)}
       />
       <Label checked={checked}>{label}</Label>
+      <DeleteButton onClick={() => onDelete(id)}>X</DeleteButton>
     </Wrapper>
   );
 };
