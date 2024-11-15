@@ -12,6 +12,11 @@ export const Wrapper = styled.label({
   fontWeight: "400",
   fontSize: 14,
   cursor: "pointer",
+  "&:hover": {
+    "& button": {
+      display: "block",
+    },
+  },
 });
 
 const Label = styled.span<{ checked: boolean }>(({ checked }) => ({
@@ -31,11 +36,22 @@ const Checkbox = styled.input({
   marginRight: 12,
 });
 
+const DeleteButton = styled.button({
+  marginLeft: "auto",
+  background: "none",
+  border: "none",
+  fontSize: 18,
+  cursor: "pointer",
+  color: "#ff4444",
+  display: "none",
+});
+
 export interface TodoItemProps {
   id: string;
   label: string;
   checked?: boolean;
   onChange?: (id: string, checked: boolean) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const TodoItem: FC<TodoItemProps> = ({
@@ -43,6 +59,7 @@ export const TodoItem: FC<TodoItemProps> = ({
   label,
   checked = false,
   onChange,
+  onDelete,
 }) => {
   return (
     <Wrapper>
@@ -50,9 +67,17 @@ export const TodoItem: FC<TodoItemProps> = ({
         type="checkbox"
         id={id}
         checked={checked}
-        onChange={(e) => onChange(id, e.target.checked)}
+        onChange={(e) => onChange?.(id, e.target.checked)}
       />
       <Label checked={checked}>{label}</Label>
+      <DeleteButton
+        onClick={(e) => {
+          e.preventDefault();
+          onDelete?.(id);
+        }}
+      >
+        ×
+      </DeleteButton>
     </Wrapper>
   );
 };

@@ -30,6 +30,8 @@ function App() {
         id: uuid(),
         label,
         checked: false,
+        created_at: Date.now(),
+        completed_at: null,
       },
       ...prev,
     ]);
@@ -37,8 +39,20 @@ function App() {
 
   const handleChange = useCallback((id: string, checked: boolean) => {
     setTodos((prev) =>
-      prev.map((todo) => (todo.id === id ? { ...todo, checked } : todo))
+      prev.map((todo) =>
+        todo.id === id
+          ? {
+              ...todo,
+              checked,
+              completed_at: checked ? Date.now() : null,
+            }
+          : todo
+      )
     );
+  }, []);
+
+  const handleDelete = useCallback((id: string) => {
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
   }, []);
 
   useEffect(() => {
@@ -53,7 +67,15 @@ function App() {
   }, [todos]);
 
   const sortedTodos = useMemo(() => {
-    return todos.sort((a, b) => (a.checked ? 1 : -1));
+    const activeTodos = todos
+      .filter((todo) => !todo.checked)
+      .sort((a, b) => b.created_at - a.created_at);
+
+    const completedTodos = todos
+      .filter((todo) => todo.checked)
+      .sort((a, b) => (a.completed_at || 0) - (b.completed_at || 0));
+
+    return [...activeTodos, ...completedTodos];
   }, [todos]);
 
   return (
@@ -62,7 +84,12 @@ function App() {
       <AddInput onAdd={addTodo} />
       <TodoList>
         {sortedTodos.map((todo) => (
-          <TodoItem {...todo} onChange={handleChange} />
+          <TodoItem
+            key={todo.id}
+            {...todo}
+            onChange={handleChange}
+            onDelete={handleDelete}
+          />
         ))}
       </TodoList>
     </Wrapper>
