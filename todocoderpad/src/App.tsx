@@ -13,31 +13,6 @@ const Wrapper = styled.div({
   width: 300,
 });
 
-/**
-* This is the initial todo state.
-* Instead of loading this data on every reload,
-* we should save the todo state to local storage,
-* and restore on page load. This will give us
-* persistent storage.
-*/
-// const initialData: Todo[] = [
-//   {
-//     id: uuid(),
-//     label: "Buy groceries",
-//     checked: false,
-//   },
-//   {
-//     id: uuid(),
-//     label: "Reboot computer",
-//     checked: false,
-//   },
-//   {
-//     id: uuid(),
-//     label: "Ace CoderPad interview",
-//     checked: true,
-//   },
-// ];
-
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
 
@@ -47,17 +22,18 @@ function App() {
         id: uuid(),
         label,
         checked: false,
+        created_at: new Date(),
+        completed_at: null,
       },
       ...prev,
     ]);
   }, []);
 
   const handleChange = useCallback((id: string, checked: boolean) => {
-    // handle the check/uncheck logic
     setTodos((prev) => {
       return prev.map((todo) => {
         if (todo.id === id) {
-          return { ...todo, checked };
+          return { ...todo, checked, completed_at: checked ? new Date() : null };
         }
         return todo;
       });
@@ -79,8 +55,14 @@ function App() {
 
   // TODO: Sort todos by checked status
   const sortedTodos = useMemo(() => {
-    return todos.sort((a, b) => a.checked ? 1 : -1);
+    // TODO: Sort by checked status, then by created_at
+    return todos.sort((a, b) => (a.checked ? 1 : -1) || a.created_at.getTime() - b.created_at.getTime());
   }, [todos]);
+
+  // TODO: Handle delete
+  const handleDelete = useCallback((id: string) => {
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+  }, []);
 
   return (
     <Wrapper>
@@ -88,7 +70,7 @@ function App() {
       <AddInput onAdd={addTodo} />
       <TodoList>
         {sortedTodos.map((todo) => (
-          <TodoItem {...todo} onChange={handleChange} />
+          <TodoItem {...todo} onChange={handleChange} onDelete={handleDelete} key={todo.id} />
         ))}
       </TodoList>
     </Wrapper>
